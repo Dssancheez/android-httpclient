@@ -51,7 +51,6 @@ fun DetalleTareaScreen(
     var titulo by rememberSaveable { mutableStateOf("") }
     var descripcion by rememberSaveable { mutableStateOf("") }
 
-    // Cuando llegue la tarea, rellena los campos
     LaunchedEffect(tarea?.id) {
         tarea?.let {
             titulo = it.titulo
