@@ -28,7 +28,8 @@ fun ListadoTareasRemoteRoute(
         onOpenDetalle = { id ->
             navController.navigate(Routes.tareaView(id))
         },
-        onDelete = {  },
+        onDelete = { id ->
+            vm.deleteTarea(id) },
         modifier = modifier
     )
 }

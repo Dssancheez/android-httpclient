@@ -18,6 +18,17 @@ import kotlinx.coroutines.launch
  */
 class TareasRemoteViewModel : ViewModel() {
 
+    fun deleteTarea(id: Int) = viewModelScope.launch {
+        try {
+            val response = RetrofitClient.tareaAPI.deleteTarea(id)
+
+            if (response.isSuccessful) {
+                loadTareas()
+            }
+        } catch (e: Exception) {
+        }
+    }
+
     // Cliente Retrofit ya configurado (baseUrl + converter).
     // Aquí obtenemos la interfaz con los endpoints (GET/POST/PUT/DELETE, etc.)
     private val api = RetrofitClient.tareaAPI
