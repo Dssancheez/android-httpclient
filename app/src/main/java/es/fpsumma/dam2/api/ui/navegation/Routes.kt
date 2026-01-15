@@ -8,6 +8,8 @@ object Routes {
 
     const val TAREA_VIEW = "tareas/detalle/{id}"
 
+    const val TAREA_LISTADO_API = "tareas/listado_api"
+
     fun tareaView(id: Int): String {
         return "tareas/detalle/$id"
     }
