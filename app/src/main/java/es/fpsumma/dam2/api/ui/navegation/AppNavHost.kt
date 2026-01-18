@@ -6,10 +6,11 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import es.fpsumma.dam2.api.ui.screen.tareas.DetalleTareaRemoteRoute
 import es.fpsumma.dam2.api.ui.screen.tareas.ListadoTareasRemoteRoute
-// Importamos las nuevas rutas en lugar de las Screens antiguas
 import es.fpsumma.dam2.api.ui.screen.tareas.DetalleTareaRoomRoute
 import es.fpsumma.dam2.api.ui.screen.tareas.ListadoTareasRoomRoute
+import es.fpsumma.dam2.api.ui.screen.tareas.NuevaTareaRemoteRoute
 import es.fpsumma.dam2.api.ui.screen.tareas.NuevaTareaRoomRoute
 import es.fpsumma.dam2.api.viewmodel.TareasRemoteViewModel
 import es.fpsumma.dam2.api.viewmodel.TareasViewModel
@@ -26,6 +27,26 @@ fun AppNavHost(navController: NavHostController, tareasViewModel: TareasViewMode
 
         composable(Routes.TAREA_LISTADO) {
             ListadoTareasRemoteRoute(navController, tareasRemoteViewModel)
+        }
+
+        composable(Routes.TAREA_ADD_API) {
+            NuevaTareaRemoteRoute(
+                vm = tareasRemoteViewModel,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+
+        composable(
+            route = Routes.TAREA_VIEW,
+            arguments = listOf(navArgument("id") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getInt("id") ?: 0
+            DetalleTareaRemoteRoute(
+                id = id,
+                vm = tareasRemoteViewModel,
+                onBack = { navController.popBackStack() }
+            )
         }
 
         composable(Routes.TAREA_ADD) {

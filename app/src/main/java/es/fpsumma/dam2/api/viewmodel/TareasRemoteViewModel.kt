@@ -46,6 +46,12 @@ class TareasRemoteViewModel : ViewModel() {
      */
     val state: StateFlow<TareasUIState> = _state
 
+    // Variable privada mutable para guardar la tarea individual
+    private val _selected = MutableStateFlow<Tarea?>(null)
+
+    // Variable pública inmutable que observará la UI
+    val selected: StateFlow<Tarea?> = _selected
+
     /**
      * Carga el listado de tareas desde la API.
      * - Pone loading=true
@@ -103,4 +109,57 @@ class TareasRemoteViewModel : ViewModel() {
             }
         }
     }
+
+
+
+    fun loadTarea(id: Int) = viewModelScope.launch {
+        runCatching {
+            val res = api.detalle(id)
+            if (!res.isSuccessful) error("HTTP ${res.code()}")
+            res.body() ?: error("Sin body")
+        }.onSuccess { dto ->
+            // Convertimos el DTO a Tarea y lo guardamos en _selected
+            _selected.value = Tarea(dto.id, dto.titulo, dto.descripcion)
+        }.onFailure { e ->
+            _state.update { it.copy(error = e.message ?: "Error cargando detalle") }
+        }
+    }
+
+
+    fun addTarea(titulo: String, descripcion: String, onResult: (Boolean) -> Unit) = viewModelScope.launch {
+        runCatching {
+            val request = es.fpsumma.dam2.api.data.remote.dto.TareaCreateRequestDTO(titulo, descripcion)
+
+            val res = api.crear(request) // Llama al método POST de tu API
+            if (!res.isSuccessful) error("Error creando tarea")
+            res.body()
+        }.onSuccess {
+            // Si sale bien, recargamos la lista para ver la nueva tarea
+            loadTareas()
+            // Avisamos a la pantalla de que ha ido bien (true) para que vuelva atrás
+            onResult(true)
+        }.onFailure { e ->
+            // Si falla, guardamos el error y avisamos (false)
+            _state.update { it.copy(error = e.message ?: "Error al crear") }
+            onResult(false)
+        }
+    }
+
+
+    fun updateTarea(id: Int, titulo: String, descripcion: String, onResult: (Boolean) -> Unit) = viewModelScope.launch {
+        runCatching {
+            val request = es.fpsumma.dam2.api.data.remote.dto.TareaUpdateRequestDTO(titulo, descripcion)
+
+            val res = api.actualizar(id, request) // Llama al método PUT de tu API
+            if (!res.isSuccessful) error("Error actualizando")
+            res.body()
+        }.onSuccess {
+            loadTareas() // Recargamos la lista
+            onResult(true)
+        }.onFailure { e ->
+            _state.update { it.copy(error = e.message ?: "Error al actualizar") }
+            onResult(false)
+        }
+    }
+
 }
